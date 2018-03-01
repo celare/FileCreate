@@ -24,16 +24,23 @@ public class MainActivity extends Activity
 	@Override
 	protected void onStart()
 	{
-		// TODO: Implement this method
 		super.onStart();
-		TextView mainTextView1 = (TextView)findViewById(R.id.mainTextView1);
-		File em2 = getPublicMusicStorageDir("eMusic2/Radiohead");
-
-		mainTextView1.setText("isExternalStorageWritable = " + String.valueOf(isExternalStorageWritable())
-							  + ". isExternalStorageReadable = " + String.valueOf(isExternalStorageReadable())
-							  + ". eMusic2 = " + em2.getAbsolutePath()
-							  + ". RequestPermission = " + String.valueOf(selfPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)));
 		
+		if (selfPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+			if (isExternalStorageWritable()){
+				File file = new File(Environment.getExternalStoragePublicDirectory(
+								 Environment.DIRECTORY_MUSIC), "eMusic2/Radiohead");
+				if (!file.exists()) {
+					if (!file.mkdirs()) {
+						Log.e(LogName, "Directory not created");
+					}
+				}
+			} else {
+				Log.e(LogName, "External storage not writable");
+			}
+		} else {
+			Log.e(LogName, "Write external storage permission not granted");
+		}
 	}
 	
 	public boolean selfPermissionGranted(String permission) {
@@ -63,19 +70,7 @@ public class MainActivity extends Activity
 
         return result;
     }
-	
-	public File getPublicMusicStorageDir(String folderName) {
-		// Get the directory for the user's public pictures directory.
-		File file = new File(Environment.getExternalStoragePublicDirectory(
-								 Environment.DIRECTORY_MUSIC), folderName);
-		if (!file.exists()) {
-			 if (!file.mkdirs()) {
-				Log.e(LogName, "Directory not created");
-			}
-		}
-		return file;
-	}
-	
+		
 	/* Checks if external storage is available for read and write */
 	public boolean isExternalStorageWritable() {
 		String state = Environment.getExternalStorageState();
@@ -85,13 +80,4 @@ public class MainActivity extends Activity
 		return false;
 	}
 
-	/* Checks if external storage is available to at least read */
-	public boolean isExternalStorageReadable() {
-		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state) ||
-			Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-			return true;
-		}
-		return false;
-	}
 }
